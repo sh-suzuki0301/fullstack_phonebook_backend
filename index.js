@@ -1,8 +1,12 @@
 const express = require("express");
 const app = express();
+const bodyParser = require('body-parser');
+const morgan = require('morgan');
 
+app.use(bodyParser.json());
 
-app.use(express.json());
+app.use(morgan('tiny'));
+
 
 let persons = [
   {
@@ -52,7 +56,7 @@ app.delete('/api/persons/:id', (req, res) => {
     res.status(204).end();
 });
 
-app.post('api/persons', (req, res) => {
+app.post('/api/persons', (req, res) => {
     let person = req.body;
 
     if (!person.name) {
@@ -74,6 +78,12 @@ app.post('api/persons', (req, res) => {
 
     res.json(person);
 });
+
+const unknownEndpoint = (req, res) => {
+    res.status(404).send({ error: "unknown endpoint"});
+};
+
+app.use(unknownEndpoint);
 
 const PORT = 3001;
 app.listen(PORT, () => {
