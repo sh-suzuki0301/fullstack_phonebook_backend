@@ -1,14 +1,25 @@
 const express = require("express");
 const app = express();
-const bodyParser = require('body-parser');
-const morgan = require('morgan');
-const cors = require('cors');
+const bodyParser = require("body-parser");
+const morgan = require("morgan");
+const cors = require("cors");
 
-app.use(express.static('build'));
+app.use(express.static("build"));
 app.use(cors());
 app.use(bodyParser.json());
-app.use(morgan('tiny'));
 
+// Login setup using morgan
+// Create custom token: return POST Body
+morgan.token("postBody", (req, res) => {
+  if (req.method === "POST") {
+    return JSON.stringify(req.body);
+  }
+});
+
+const loggerFormat =
+  ":method :url :status :res[content-length] - :response-time ms :postBody";
+
+app.use(morgan(loggerFormat));
 
 let persons = [
   {
@@ -28,65 +39,65 @@ let persons = [
   },
 ];
 
-app.get('/', (req, res) => {
-    res.send("Hello World!!");
+app.get("/", (req, res) => {
+  res.send("Hello World!!");
 });
 
-app.get('/info', (req, res) => {
-    const timestamp = new Date();
+app.get("/info", (req, res) => {
+  const timestamp = new Date();
 
-    res.send(
-        `<p>Phonebook has info for ${persons.length} people</p>
+  res.send(
+    `<p>Phonebook has info for ${persons.length} people</p>
         <p>${timestamp}</p>`
-    );
+  );
 });
 
-app.get('/api/persons', (req, res) => {
-    res.json(persons);
+app.get("/api/persons", (req, res) => {
+  res.json(persons);
 });
 
-app.get('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id);
-    const person = persons.find(person => person.id === id);
-     if (person) {
-         res.json(person);
-     } else {
-         res.status(404).end();
-     }
-});
-
-app.delete('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id);
-    persons = persons.filter(p => p.id !== id);
-
-    res.status(204).end();
-});
-
-app.post('/api/persons', (req, res) => {
-    let person = req.body;
-
-    if (!person.name) {
-        return res.status(400).json({ error: "name must be given" });
-    }
-
-    if (!person.number) {
-        return res.status(400).json({ error: "number must be given" });
-    }
-
-    if (persons.find(p => p.name === person.name)) {
-        return res.status(400).json({ error: "name must be unique" });
-    }
-
-    let randomId = Math.floor(Math.random() * 900000) + 100000;
-    person = {...person, id: randomId };
-    console.log(person);
-    persons = persons.concat(person);
-
+app.get("/api/persons/:id", (req, res) => {
+  const id = Number(req.params.id);
+  const person = persons.find((person) => person.id === id);
+  if (person) {
     res.json(person);
+  } else {
+    res.status(404).end();
+  }
+});
+
+app.delete("/api/persons/:id", (req, res) => {
+  const id = Number(req.params.id);
+  persons = persons.filter((p) => p.id !== id);
+
+  res.status(204).end();
+});
+
+app.post("/api/persons", (req, res) => {
+  let person = req.body;
+
+  if (!person.name) {
+    return res.status(400).json({ error: "name must be given" });
+  }
+
+  if (!person.number) {
+    return res.status(400).json({ error: "number must be given" });
+  }
+
+  if (persons.find((p) => p.name === person.name)) {
+    return res.status(400).json({ error: "name must be unique" });
+  }
+
+  let randomId = Math.floor(Math.random() * 900000) + 100000;
+  person = { ...person, id: randomId };
+  console.log(person);
+  persons = persons.concat(person);
+
+  res.json(person);
 });
 
 const unknownEndpoint = (req, res) => {
-    res.status(404).send({ error: "unknown endpoint"});
+  res.status(404).send({ error: "unknown endpoint" });
 };
 
 app.use(unknownEndpoint);
