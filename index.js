@@ -1,4 +1,4 @@
-require('dotenv').config();
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
@@ -38,7 +38,7 @@ app.get("/info", (req, res) => {
 
 app.get("/api/persons", (req, res) => {
   Person.find({}).then(persons => {
-    res.json(person.map(p => p.toJSON()));
+    res.json(persons.map(p => p.toJSON()));
   });
 });
 
