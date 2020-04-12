@@ -4,7 +4,7 @@ const app = express();
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const cors = require("cors");
-const Person = require("./modules/person");
+const Person = require("./models/person");
 
 app.use(express.static("build"));
 app.use(cors());
@@ -42,11 +42,17 @@ app.get("/api/persons", (req, res) => {
   });
 });
 
-app.get("/api/persons/:id", (req, res) => {
-  Person.findById(req.params.id).then(p => {
-    res.json(p.toJSON());
-    console.log(p.toJSON());
-  });
+app.get("/api/persons/:id", (req, res, next) => {
+  Person.findById(req.params.id)
+    .then(p => {
+      if (p) {
+      res.json(p.toJSON());
+      console.log(p.toJSON());
+    } else {
+      res.status(404).end();
+    }
+  })
+  .catch(error => next(error));
 });
 
 app.post("/api/persons", (req, res) => {
@@ -65,11 +71,30 @@ app.post("/api/persons", (req, res) => {
   }); 
 });
 
+app.delete("/api/persons/:id", (req, res, next) => {
+  Person.findByIdAndRemove(req.params.id)
+    .then(result => {
+      res.status(204).end();
+    })
+    .catch(error => next(error));
+});
+
+
 const unknownEndpoint = (req, res) => {
   res.status(404).send({ error: "unknown endpoint" });
 };
 
 app.use(unknownEndpoint);
+
+const errorHandler = (error, req, res, next) => {
+  console.log(error.message);
+  if (error.name === "CastError" && error.kind === "ObjectId") {
+    return res.status(404).send({ error: "malformatted id" });
+  }
+  next(error);
+};
+
+app.use(errorHandler);
 
 const { PORT } = process.env
 app.listen(PORT, () => {
