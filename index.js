@@ -53,7 +53,7 @@ app.get("/api/persons/:id", (req, res, next) => {
 });
 
 app.post("/api/persons", (req, res, next) => {
-  let body = req.body;
+  const body = req.body;
   if (!body.name) {
     return res.status(400).json({ error: "name must be given" });
   }
