@@ -4,6 +4,7 @@ const uniqueValidator = require('mongoose-unique-validator');
 
 mongoose.set("useUnifiedTopology", true);
 mongoose.set("useFindAndModify", false);
+mongoose.set("useCreateIndex", true);
 
 console.log("connecting to", MONGODB_URI);
 
@@ -21,6 +22,7 @@ const phonebookSchema = new mongoose.Schema({
     name: String,
     number: String
 });
+phonebookSchema.plugin(uniqueValidator);
 
 phonebookSchema.set("toJSON", {
     transform: (document, returnedObject) => {
