@@ -1,4 +1,5 @@
-My practice for build a server by Node,js/Express
+My practice for build a server by Node.js/Express  
+(with MongoDB Atlas/mongoose)
   
 Backend:  
 https://evening-shelf-39665.herokuapp.com/api/persons 
